@@ -14,6 +14,7 @@ sub new {
     my $self = bless {}, $class;
     my $fd = $self->i2c_setup($self->addr($addr));
     $self->fd($fd);
+    return $self;
 }
 sub read {
     $_[0]->i2c_read($_[0]->fd);
@@ -88,6 +89,13 @@ RPi::I2C - Interface to the I2C bus on the Raspberry Pi
 
     $i2c_dev->write_word($data, $register);
     my $word = $i2c_dev->read_word($register);
+
+=head1 NOTES
+
+#FIXME: items to document
+- for arduino:
+    ram=i2c_arm=on
+    dtparam=i2c_arm_baudrate=10000
 
 =head1 DESCRIPTION
 
