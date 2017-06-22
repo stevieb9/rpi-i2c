@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
+
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
@@ -11,6 +12,19 @@ WriteMakefile(
     LICENSE          => 'GPL_2',
     PL_FILES         => {},
     MIN_PERL_VERSION => 5.006,
+    META_MERGE => {
+        'meta-spec' => { version => 2 },
+        resources   => {
+            bugtracker => {
+                web => 'https://github.com/stevieb9/rpi-i2c/issues',
+            },
+            repository => {
+                type => 'git',
+                url => 'https://github.com/stevieb9/rpi-i2c.git',
+                web => 'https://github.com/stevieb9/rpi-i2c',
+            },
+        },
+    },
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
     },
@@ -18,8 +32,7 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'WiringPi::API' => 2.3609,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'RPi-I2C-*' },
