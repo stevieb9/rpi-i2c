@@ -7,6 +7,8 @@ use parent 'WiringPi::API';
 
 our $VERSION = '2.3602';
 
+use constant DEFAULT_REGISTER => 0x00;
+
 sub new {
     my ($class, $addr) = @_;
     my $self = bless {}, $class;
@@ -18,12 +20,12 @@ sub read {
 }
 sub read_byte {
     my ($self, $reg) = @_;
-    $reg = 0x0 if ! defined $reg;
+    $reg = DEFAULT_REGISTER if ! defined $reg;
     $self->i2c_read_byte($self->fd, $reg);
 }
 sub read_word {
     my ($self, $reg) = @_;
-    $reg = 0x0 if ! defined $reg;
+    $reg = DEFAULT_REGISTER if ! defined $reg;
     $self->i2c_read_word($self->fd, $reg);
 }
 sub write {
@@ -31,12 +33,12 @@ sub write {
 }
 sub write_byte {
     my ($self, $data, $reg) = @_;
-    $reg = 0x0 if ! defined $reg;
+    $reg = DEFAULT_REGISTER if ! defined $reg;
     $self->i2c_write_byte($self->fd, $reg, $data);
 }
 sub write_word {
     my ($self, $data, $reg) = @_;
-    $reg = 0x0 if ! defined $reg;
+    $reg = DEFAULT_REGISTER if ! defined $reg;
     $self->i2c_write_word($self->fd, $reg, $data);
 
 }

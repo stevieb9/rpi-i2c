@@ -1,5 +1,9 @@
 Revision history for RPi-I2C
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+2.3602 UNREL
+        - changed all instances of 0x0 to a DEFAULT_REGISTER constant
+
+
+2.3601  2017-06-22
+        - First version, released on an unsuspecting world.
 
