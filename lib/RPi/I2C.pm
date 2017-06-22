@@ -12,7 +12,7 @@ use constant DEFAULT_REGISTER => 0x00;
 sub new {
     my ($class, $addr) = @_;
     my $self = bless {}, $class;
-    my $fd = i2c_setup($self->addr($addr));
+    my $fd = $self->i2c_setup($self->addr($addr));
     $self->fd($fd);
 }
 sub read {
