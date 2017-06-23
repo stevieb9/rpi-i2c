@@ -86,11 +86,6 @@ sub write_byte {
     $reg = _set_reg($reg);
     return _writeByteData($self->fileno, $reg, $value);
 }
-sub write_bytes {
-    my ($self, $value, $reg) = @_;
-    $reg = _set_reg($reg);
-    return _writeByteData($self->fileno, $reg, $value);
-}
 sub write_word {
     my ($self, $reg, $value) = @_;
     $reg = _set_reg($reg);
@@ -198,6 +193,26 @@ Parameters:
 Optional, Integer: The device's register to read from. eg: C<0x01>. Defaults to
 C<0x0>.
 
+=head2 read_bytes($num_bytes, [$reg])
+
+Allows you to read a specific number of bytes from a register and get the bytes
+returned as an array.
+
+Parameters:
+
+    $num_bytes
+
+Mandatory, Integer: The number of bytes you want to read. These are contiguous
+starting from the C<$reg> (if supplied, otherwise C<0x00>).
+
+    $reg
+
+Optional, Integer: The device's register to read from. eg: C<0x01>. Defaults to
+C<0x0>.
+
+Return, Array: An array where each element is a byte of data. The length of this
+array is dictated by the C<$num_bytes> parameter.
+
 =head2 read_word([$reg])
 
 Same as C<read_byte()>, but reads two bytes (16-bit word) instead.
@@ -300,6 +315,12 @@ Mandatory, Integer: The I2C address of a device you suspect is connected. eg:
 C<0x7c>.
 
 Return, Bool: True (C<1>) if the device responds, False (C<0>) if not.
+
+=head1 ACKNOWLEDGEMENTS
+
+All of the XS code was copied directly from L<Device::I2C>, written by Slava
+Volkov (SVOLKOV). The module itself was brought over as well, but changed quite
+a bit. Thanks Slava for a great piece of work!
 
 =head1 AUTHOR
 
