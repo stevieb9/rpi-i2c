@@ -3,21 +3,19 @@ use strict;
 
 # read block from Arduino
 
+# 1023
+
 use RPi::I2C;
 
 my $arduino_addr = 0x04;
 
 my $arduino = RPi::I2C->new($arduino_addr);
 
-for (0..10){
-    my @a = $arduino->read_block(0x05, 2);
+my @a = $arduino->read_block(2, 0x0A);
 
-    my $num = ($a[0] << 8) | $a[1];
-    
-    print "$num\n";
+my $num = ($a[0] << 8) | $a[1];
 
-    # delay(0.5);
-}
+print "$num\n";
 
 sub delay {
     die "delay() needs a number\n" if ! @_;

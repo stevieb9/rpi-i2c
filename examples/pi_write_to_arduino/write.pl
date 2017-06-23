@@ -11,7 +11,7 @@ my $arduino_addr = 0x04;
 
 my $arduino = RPi::I2C->new($arduino_addr);
 
-my $x = $arduino->write(254);
+my $x = $arduino->write(25);
 
 sub delay {
     die "delay() needs a number\n" if ! @_;

@@ -4,20 +4,16 @@ use strict;
 # does a single byte basic read() from an Arduino
 # and prints out whatever is returned
 
+# 0
+
 use RPi::I2C;
 
 my $arduino_addr = 0x04;
 
 my $arduino = RPi::I2C->new($arduino_addr);
 
-for (0..10){
-    my $x = $arduino->read;
-    
-#    my $value = ($x << 8) | $y;
-    
-    print "$x\n";
-    delay(0.5);
-}
+my $x = $arduino->read;
+print "$x\n";
 
 sub delay {
     die "delay() needs a number\n" if ! @_;
