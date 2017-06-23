@@ -1,6 +1,15 @@
 use warnings;
 use strict;
 
+# read word from Arduino
+
+# NOTE that the Arduino has LSB first, so the
+# bytes need to be swapped.
+
+# Also, the Arduino can only send a single byte
+# at a time, so it's not trustworthy to be testing
+# read_word() on
+
 use RPi::I2C;
 
 my $arduino_addr = 0x04;
