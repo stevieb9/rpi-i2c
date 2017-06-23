@@ -116,11 +116,41 @@ RPi::I2C - Interface to the I2C bus
 
 =head1 SYNOPSIS
 
+    use RPi::I2C;
+
+    my $device_addr = 0x04;
+
+    my $device = RPi::I2C->new($device_addr);
+
+    # read a single byte at the default register address
+
+    print $device->read;
+
+    # read a single byte at a specified register
+
+    print $device->read_byte(0x15);
+
+    # read a block of five bytes (register param optional, not shown)
+
+    my @bytes = $device->read_block(5);
+
+    # write a byte
+
+    $device->write(255);
+
+    # write a byte to a register location
+
+    $device->write_byte(255, 0x0A);
+
+    # write a block of bytes (register param left out again)
+
+    $device->write_block([1, 2, 3, 4]);
+
+See the examples direcory for more information on usage with an Arduino unit.
 
 =head1 DESCRIPTION
 
-Interface to read and write to I2C bus devices. Almost all of this code was
-copied from L<Device::I2C>.
+Interface to read and write to I2C bus devices.
 
 =head1 YOU SHOULD KNOW
 
