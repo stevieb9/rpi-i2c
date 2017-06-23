@@ -3,7 +3,7 @@ package RPi::I2C;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '2.3602';
 our @ISA = qw(IO::Handle);
  
 use Carp;
@@ -11,24 +11,31 @@ use IO::File;
 use Fcntl;
  
 require XSLoader;
-XSLoader::load( 'RPi::I2C', $VERSION );
+XSLoader::load('RPi::I2C', $VERSION);
  
 use constant I2C_SLAVE_FORCE => 0x0706;
- 
-sub new {
-    my $class = shift;
-    @_ >= 0 && @_ <= 2
-      or croak "usage: $class->new(DEVICENAME [,MODE])";
-    my $self = IO::File->new(@_);
-    if (! $self) {
-        croak "Unable to open I2C Device File at $_[0]";
-        return undef;
-    }
 
-    bless $self, $class;
+sub new {
+    my ($class, $addr, $dev) = @_;
+
+    if (! defined $addr || $addr !~ /^\d+$/){ 
+        croak "new() requires the \$addr param, as an integer";
+    }
+   
+    $dev = defined $dev ? $dev : '/dev/i2c-1';
+
+    my $fh = IO::File->new($dev, O_RDWR);
+    
+    my $self = bless $fh, $class;
+
+    if ($self->ioctl(I2C_SLAVE_FORCE, int($addr)) < 0){
+        printf("Device 0x%x not found\n", $addr);
+        exit 1;
+    }
+    
     return $self;
-}
-sub process_call {
+}        
+sub process {
     my ($self, $register_address, $value) = @_;
     return _processCall($self->fileno, $register_address, $value);
 }
@@ -39,27 +46,20 @@ sub check_device {
 sub file_error {
     return $_[0]->error;
 }
-sub select_device {
-    my ($self, $addr) = @_;
-    if ($self->ioctl(I2C_SLAVE_FORCE, $addr) < 0){
-        printf("Device 0x%x not found\n", $addr);
-        exit 1;
-    }
-}
 sub read {
     return _readByte($_[0]->fileno);
 }
 sub write {
     my ($self, $value) = @_;
-    my $retval = _writeQuick($self->fileno, $value);
+    my $retval = _writeByteData($self->fileno, $value);
 }
 sub read_byte {
     my ($self, $register_address) = @_;
     return _readByteData($self->fileno, $register_address);
 }
 sub write_byte {
-    my ($self, $value) = @_;
-    return _writeByte($self->fileno, $value);
+    my ($self, $reg, $value) = @_;
+    return _writeByteData($self->fileno, $reg, $value);
 }
 sub read_bytes {
     my ($self, $reg, $num_bytes) = @_;
@@ -85,7 +85,8 @@ sub read_block {
     my ($self, $register_address, $num_bytes) = @_;
     my $read_val = '0' x ($num_bytes);
     my $retval = _readI2CBlockData($self->fileno, $register_address, $read_val);
-    return unpack( "C*", $read_val );
+    my @return = unpack( "C*", $read_val );
+    return @return;
 }
 sub write_block {
     my ($self, $register_address, $values) = @_;

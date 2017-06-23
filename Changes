@@ -3,6 +3,8 @@ Revision history for RPi-I2C
 2.3602 UNREL
         - changed all instances of 0x0 to a DEFAULT_REGISTER constant
         - added missing $self to the i2c_setup() call
+        - completely changed the way we work. We do not use wiringPi for this
+          anymore due to lack of options
 
 2.3601  2017-06-22
         - First version, released on an unsuspecting world.
