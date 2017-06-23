@@ -103,7 +103,7 @@ void send_data (){
             break;
         }
         case READ_A1: {
-            Serial.println("Analog 0");
+            Serial.println("Analog 1");
             read_analog(A0);
             break;
         }
@@ -112,7 +112,6 @@ void send_data (){
 
 int read_analog (int pin){
     int val = analogRead(pin);
-    Serial.println(pin);
 
     uint8_t buf[2];
 
@@ -157,18 +156,12 @@ void receive_data (int num_bytes){
                 for (byte i=0; i<EEPROM_SIZE; i++){
                     buf[i] = Wire.read();
                     data += buf[i];
-                    Serial.print(i);
-                    Serial.print(": ");
-                    Serial.println(buf[i]);
                 }
 
                 eeprom_save(buf, EEPROM_SIZE);
                 break;
             }
         }
-
-        Serial.print("data: ");
-        Serial.println(data);
     }
     Serial.println("\n");
 }
