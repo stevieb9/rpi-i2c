@@ -3,92 +3,109 @@ package RPi::I2C;
 use strict;
 use warnings;
 
-use parent 'WiringPi::API';
-
-our $VERSION = '2.3602';
-
-use constant DEFAULT_REGISTER => 0x00;
-
+our $VERSION = '0.01';
+our @ISA = qw(IO::Handle);
+ 
+use Carp;
+use IO::File;
+use Fcntl;
+ 
+require XSLoader;
+XSLoader::load( 'RPi::I2C', $VERSION );
+ 
+use constant I2C_SLAVE_FORCE => 0x0706;
+ 
 sub new {
-    my ($class, $addr) = @_;
-    my $self = bless {}, $class;
-    my $fd = $self->i2c_setup($self->addr($addr));
-    $self->fd($fd);
+    my $class = shift;
+    @_ >= 0 && @_ <= 2
+      or croak "usage: $class->new(DEVICENAME [,MODE])";
+    my $self = IO::File->new(@_);
+    if (! $self) {
+        croak "Unable to open I2C Device File at $_[0]";
+        return undef;
+    }
+
+    bless $self, $class;
     return $self;
 }
+sub process_call {
+    my ($self, $register_address, $value) = @_;
+    return _processCall($self->fileno, $register_address, $value);
+}
+sub check_device {
+    my ($self, $addr) = @_;
+    return _checkDevice($self->fileno, $addr);
+}
+sub file_error {
+    return $_[0]->error;
+}
+sub select_device {
+    my ($self, $addr) = @_;
+    if ($self->ioctl(I2C_SLAVE_FORCE, $addr) < 0){
+        printf("Device 0x%x not found\n", $addr);
+        exit 1;
+    }
+}
 sub read {
-    $_[0]->i2c_read($_[0]->fd);
-}
-sub read_byte {
-    my ($self, $reg) = @_;
-    $reg = DEFAULT_REGISTER if ! defined $reg;
-    $self->i2c_read_byte($self->fd, $reg);
-}
-sub read_word {
-    my ($self, $reg) = @_;
-    $reg = DEFAULT_REGISTER if ! defined $reg;
-    $self->i2c_read_word($self->fd, $reg);
+    return _readByte($_[0]->fileno);
 }
 sub write {
-    $_[0]->i2c_write($_[0]->fd, $_[1]);
+    my ($self, $value) = @_;
+    my $retval = _writeQuick($self->fileno, $value);
+}
+sub read_byte {
+    my ($self, $register_address) = @_;
+    return _readByteData($self->fileno, $register_address);
 }
 sub write_byte {
-    my ($self, $data, $reg) = @_;
-    $reg = DEFAULT_REGISTER if ! defined $reg;
-    $self->i2c_write_byte($self->fd, $reg, $data);
+    my ($self, $value) = @_;
+    return _writeByte($self->fileno, $value);
+}
+sub read_bytes {
+    my ($self, $reg, $num_bytes) = @_;
+    my $retval = 0;
+    for (1..$num_bytes){
+        $retval = (0 << 8) | _readByteData($self->fileno, $reg + $num_bytes - $_)
+    }
+    return $retval;
+}
+sub write_bytes {
+    my ($self, $register_address, $value) = @_;
+    return _writeByteData($self->fileno, $register_address, $value);
+}
+sub read_word {
+    my ($self, $register_address) = @_;
+    return _readWordData($self->fileno, $register_address);
 }
 sub write_word {
-    my ($self, $data, $reg) = @_;
-    $reg = DEFAULT_REGISTER if ! defined $reg;
-    $self->i2c_write_word($self->fd, $reg, $data);
+    my ($self, $register_address, $value) = @_;
+    return _writeWordData($self->fileno, $register_address, $value);
+}
+sub read_block {
+    my ($self, $register_address, $num_bytes) = @_;
+    my $read_val = '0' x ($num_bytes);
+    my $retval = _readI2CBlockData($self->fileno, $register_address, $read_val);
+    return unpack( "C*", $read_val );
+}
+sub write_block {
+    my ($self, $register_address, $values) = @_;
+    my $value = pack "C*", @{$values};
+    return _writeI2CBlockData($self->fileno, $register_address, $value);
+}
+sub DESTROY {
+    $_[0]->close if defined $_[0]->fileno;
+}
 
-}
-sub addr {
-    $_[0]->{addr} = $_[1] if @_ > 1;
-    return $_[0]->{addr};
-}
-sub fd {
-    $_[0]->{fd} = $_[1] if @_ > 1;
-    return $_[0]->{fd};
-}
-
-sub _placeholder {} # vim folds
+sub __placeholder {} # vim folds
 
 1;
 __END__
 
 =head1 NAME
 
-RPi::I2C - Interface to the I2C bus on the Raspberry Pi
+RPi::I2C - Interface to the I2C bus
 
 =head1 SYNOPSIS
-
-    use RPi::I2C;
-
-    my $addr = 0x3c;
-    my $data = 0xFF;
-
-    my $i2c_dev = RPi::I2C->new($addr);
-
-    # simple byte write/read (default register, 0x00)
-
-    $i2c_dev->write($data);
-    my $byte = $i2c_dev->read;
-
-    # write and read byte from specific register
-
-    # ...the register does not have to be specified
-    # if you're using the default (0x00)
-
-    my $register = 0x01;
-
-    $i2c_dev->write_byte($data, $register);
-    $byte = $i2c_dev->read_byte($register);
-
-    # write and read two bytes (word) from specific register
-
-    $i2c_dev->write_word($data, $register);
-    my $word = $i2c_dev->read_word($register);
 
 =head1 NOTES
 
@@ -99,10 +116,6 @@ RPi::I2C - Interface to the I2C bus on the Raspberry Pi
 
 =head1 DESCRIPTION
 
-Interface to the I2C bus. This API is designed to operate on the Raspberry Pi
-platform, but should work on other devices, possibly with some tweaking.
-
-Requires L<wiringPi|http://wiringpi.com> v2.36+ to be installed.
 
 =head1 METHODS
 

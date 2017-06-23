@@ -11,7 +11,7 @@ my $arduino_addr = 0x04;
 my $arduino = RPi::I2C->new($arduino_addr);
 
 for (0..10){
-    my $d = $arduino->read_byte(0x05);
+    my $d = $arduino->read_byte(0x00);
     print "$d\n";
     delay(0.5);
 }

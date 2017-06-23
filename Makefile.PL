@@ -11,6 +11,7 @@ WriteMakefile(
     ABSTRACT_FROM    => 'lib/RPi/I2C.pm',
     LICENSE          => 'GPL_2',
     PL_FILES         => {},
+    INC              => "-I.",
     MIN_PERL_VERSION => 5.006,
     META_MERGE => {
         'meta-spec' => { version => 2 },
