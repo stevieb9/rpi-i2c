@@ -11,7 +11,13 @@ my $arduino_addr = 0x04;
 
 my $arduino = RPi::I2C->new($arduino_addr);
 
-my $x = $arduino->write(25);
+$arduino->write(25);
+
+# read the eeprom data back
+
+my @eeprom = $arduino->read_block(4, 99);
+
+print "eeprom: $eeprom[0]\n";
 
 sub delay {
     die "delay() needs a number\n" if ! @_;
