@@ -11,12 +11,24 @@ void send_data (){
 void receive_data (int num_bytes){
   Serial.print("bytes in: ");
   Serial.println(num_bytes);
+
+  int16_t data;
   
   while(Wire.available()){
-    Wire.read(); // throw away register byte
+    if (num_bytes > 1){
+      // throw away register byte if we received one
+      int8_t reg = Wire.read();
+      Serial.print("register addr: ");
+      Serial.println(reg);
+    }
     
-    int16_t data = Wire.read(); // low byte
-    data += Wire.read() << 8;   // high byte
+    if (num_bytes > 2){
+      data = Wire.read();
+      data += Wire.read() << 8;
+    }
+    else {
+      data = Wire.read();
+    }
     
     Serial.print("data: ");
     Serial.println(data);

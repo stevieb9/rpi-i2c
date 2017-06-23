@@ -10,7 +10,13 @@ my $arduino_addr = 0x04;
 
 my $arduino = RPi::I2C->new($arduino_addr);
 
-for (0..512){
+for (0..10){
     my $d = $arduino->read;
     print "$d\n";
+    delay(0.5);
+}
+
+sub delay {
+    die "delay() needs a number\n" if ! @_;
+    return select(undef, undef, undef, shift);
 }
