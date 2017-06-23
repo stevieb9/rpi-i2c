@@ -8,14 +8,6 @@
 MODULE = RPi::I2C PACKAGE = RPi::I2C PREFIX = I2C_
 PROTOTYPES: DISABLE
  
-#int I2C__writeQuick(file, value)
-#    int file
-#    int value
-#  CODE:
-#    RETVAL = i2c_smbus_write_quick(file, value);
-#  OUTPUT:
-#    RETVAL
- 
 int I2C__checkDevice(file, value)
     int file
     int value

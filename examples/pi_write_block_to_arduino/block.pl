@@ -1,9 +1,7 @@
 use warnings;
 use strict;
 
-# writes an 8-bit byte to the Arduino
-
-# LSB is read first, then the MSB
+# write block (array) to Arduino
 
 use RPi::I2C;
 
@@ -11,7 +9,7 @@ my $arduino_addr = 0x04;
 
 my $arduino = RPi::I2C->new($arduino_addr);
 
-my $x = $arduino->write(254);
+$arduino->write_block([5, 10, 15, 20], 0x00);
 
 sub delay {
     die "delay() needs a number\n" if ! @_;

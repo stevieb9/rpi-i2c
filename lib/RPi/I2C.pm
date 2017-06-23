@@ -53,7 +53,7 @@ sub read {
 sub read_byte {
     my ($self, $reg) = @_;
     $reg = _set_reg($reg);
-    return _readByteData($self->fileno, $register_address);
+    return _readByteData($self->fileno, $reg);
 }
 sub read_bytes {
     my ($self, $num_bytes, $reg) = @_;
@@ -79,7 +79,7 @@ sub read_block {
 }
 sub write {
     my ($self, $value) = @_;
-    return writeByteData($self->fileno, $value);
+    return _writeByte($self->fileno, $value);
 }
 sub write_byte {
     my ($self, $value, $reg) = @_;
@@ -97,14 +97,14 @@ sub write_word {
     return _writeWordData($self->fileno, $reg, $value);
 }
 sub write_block {
-    my ($self, $reg, $values) = @_;
+    my ($self, $values, $reg) = @_;
     $reg = _set_reg($reg);
     my $value = pack "C*", @{$values};
     return _writeI2CBlockData($self->fileno, $reg, $value);
 }
-sub _set_reg($reg){
-    return DEFAULT_REGISTER if ! defined $reg;
-    return $reg;
+sub _set_reg{
+    return DEFAULT_REGISTER if ! defined $_[0];
+    return $_[0];
 }
 sub DESTROY {
     $_[0]->close if defined $_[0]->fileno;
