@@ -346,6 +346,18 @@ C<0x7c>.
 
 Return, Bool: True (C<1>) if the device responds, False (C<0>) if not.
 
+=head1 UNIT TESTS
+
+This distribution has a bare minimum of unit tests. This is because the larger
+encompassing distribution, L<RPi::WiringPi> has an automated Continuous
+Integration suite (including a dedicated hardware platform) for testing all of
+the C<RPi::> distributions automatically.
+
+The tests specific to this distribution use I2C communication between a Pi and
+an Arduino board. The files in the C<examples> directory are the foundation of
+the tests that are now run, and both the examples and the real tests use the
+C<arduino.ino> sketch in the examples directory as the Arduino code.
+
 =head1 ACKNOWLEDGEMENTS
 
 All of the XS code was copied directly from L<Device::I2C>, written by Slava
