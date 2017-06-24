@@ -170,7 +170,7 @@ To test your I2C bus:
 
 ...or on some machines:
 
-    i2cdetect -y 1
+    i2cdetect -y 0
 
 =head2 Raspberry Pi
 

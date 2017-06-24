@@ -33,7 +33,6 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        'WiringPi::API' => 2.3609,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'RPi-I2C-*' },
