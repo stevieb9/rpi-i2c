@@ -3,7 +3,7 @@ package RPi::I2C;
 use strict;
 use warnings;
 
-our $VERSION = '2.3604';
+our $VERSION = '2.3605';
 our @ISA = qw(IO::Handle);
  
 use Carp;
