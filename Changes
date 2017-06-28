@@ -5,6 +5,7 @@ Revision history for RPi-I2C
         - POD fixes
         - added UNIT TESTS section in POD to explain why there's no unit tests
           for this distribution
+        - remove useless int param in XS readByte(), throwing a compiler warning
 
 2.3603  2017-06-23
         - completely changed the way we work. We do not use wiringPi for this

@@ -18,7 +18,6 @@ int I2C__checkDevice(file, value)
  
 int I2C__readByte(file)
     int file
-    int reg
   CODE:
     RETVAL = i2c_smbus_read_byte(file);
   OUTPUT:
