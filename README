@@ -60,7 +60,7 @@ YOU SHOULD KNOW
 
     ...or on some machines:
 
-        i2cdetect -y 1
+        i2cdetect -y 0
 
  Raspberry Pi
 
@@ -239,6 +239,19 @@ METHODS
     connected. eg: 0x7c.
 
     Return, Bool: True (1) if the device responds, False (0) if not.
+
+UNIT TESTS
+
+    This distribution has a bare minimum of unit tests. This is because the
+    larger encompassing distribution, RPi::WiringPi has an automated
+    Continuous Integration suite (including a dedicated hardware platform)
+    for testing all of the RPi:: distributions automatically.
+
+    The tests specific to this distribution use I2C communication between a
+    Pi and an Arduino board. The files in the examples directory are the
+    foundation of the tests that are now run, and both the examples and the
+    real tests use the arduino.ino sketch in the examples directory as the
+    Arduino code.
 
 ACKNOWLEDGEMENTS
 

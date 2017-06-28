@@ -1,6 +1,6 @@
 Revision history for RPi-I2C
 
-2.3604 UNREL
+2.3604  2017-06-28
         - removed WiringPi::API from being a prereq
         - POD fixes
         - added UNIT TESTS section in POD to explain why there's no unit tests

@@ -104,7 +104,7 @@ void send_data (){
         }
         case READ_A1: {
             Serial.println("Analog 1");
-            read_analog(A0);
+            read_analog(A1);
             break;
         }
     }
