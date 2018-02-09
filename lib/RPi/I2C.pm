@@ -183,7 +183,7 @@ C</boot/config.txt> file:
 =head2 Arduino
 
 Often, the default speed of the I2C bus master is too fast for an Arduino. If
-you do not get any results, try changing the spped. On a Raspberry Pi, you do
+you do not get any results, try changing the speed. On a Raspberry Pi, you do
 that by setting the C<dtparam=i2c_arm_baudrate> directive in the
 C</boot/config.txt> file:
 
