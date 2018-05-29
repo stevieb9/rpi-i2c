@@ -29,11 +29,13 @@ sub new {
     
     my $self = bless $fh, $class;
 
-    if ($self->ioctl(I2C_SLAVE_FORCE, int($addr)) < 0){
-        printf("Device 0x%x not found\n", $addr);
-        exit 1;
-    }
-    
+    my $i2c_conn = $self->ioctl(I2C_SLAVE_FORCE, int($addr));
+
+    if (! defined $i2c_conn || $i2c_conn < 0){
+        if (! $ENV{I2C_TESTING}){
+            croak "I2C device at address 0x%x not found\n", $addr;
+        }
+    } 
     return $self;
 }        
 sub process {
