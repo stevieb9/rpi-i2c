@@ -1,7 +1,8 @@
 Revision history for RPi-I2C
 
 2.3606 UNREL
-        -
+        - re-wrote readI2cBlockData() in order to gracefully handle a panic
+          situation when the I2C device is no longer available (fixes #4)
 
 2.3605  2018-02-09
         - fix typo in POD (closes #3)

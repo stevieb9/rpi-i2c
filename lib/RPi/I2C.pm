@@ -75,7 +75,8 @@ sub read_block {
     my ($self, $num_bytes, $reg) = @_;
     $reg = _set_reg($reg);
     my $read_val = '0' x ($num_bytes);
-    my $retval = _readI2CBlockData($self->fileno, $reg, $read_val);
+    _readI2CBlockData($self->fileno, $reg, $read_val);
+    print $@;
     my @return = unpack( "C*", $read_val );
     return @return;
 }
