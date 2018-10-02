@@ -3,6 +3,7 @@ Revision history for RPi-I2C
 2.3607 UNREL
         - update croak() error in XS read_block() to ask user if I2C speed too
           high if a fatal error occurs (closes #8)
+        - remove erroneous print statement from read_block() (closes #7)
 
 2.3606  2018-05-29
         - re-wrote readI2cBlockData() in order to gracefully handle a panic
