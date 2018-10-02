@@ -33,7 +33,8 @@ sub new {
 
     if (! defined $i2c_conn || $i2c_conn < 0){
         if (! $ENV{I2C_TESTING}){
-            croak "I2C device at address 0x%x not found\n", $addr;
+            my $hex_addr = sprintf "0x%x", $addr;
+            croak "I2C device at address $hex_addr not found\n";
         }
     } 
     return $self;
