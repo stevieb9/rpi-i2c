@@ -1,5 +1,8 @@
 Revision history for RPi-I2C
 
+2.3609 UNREL
+        -
+
 2.3608  2019-06-27
         - No functional changes
         - Add return values to all methods (closes #9)
