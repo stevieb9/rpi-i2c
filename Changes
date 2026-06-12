@@ -1,7 +1,8 @@
 Revision history for RPi-I2C
 
-2.3609 UNREL
-        -
+3.1801 UNREL
+        - Exit Makefile.PL gracefully on non-Linux platforms (NA instead of
+          FAIL) since the module requires the Linux I2C interface
 
 2.3608  2019-06-27
         - No functional changes
