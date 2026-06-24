@@ -3,30 +3,30 @@ package RPi::I2C;
 use strict;
 use warnings;
 
-our $VERSION = '3.19';
+our $VERSION = '3.1802';
 our @ISA = qw(IO::Handle);
- 
+
 use Carp;
 use IO::File;
 use Fcntl;
- 
+
 require XSLoader;
 XSLoader::load('RPi::I2C', $VERSION);
- 
+
 use constant I2C_SLAVE_FORCE => 0x0706;
 use constant DEFAULT_REGISTER => 0x00;
 
 sub new {
     my ($class, $addr, $dev) = @_;
 
-    if (! defined $addr || $addr !~ /^\d+$/){ 
+    if (! defined $addr || $addr !~ /^\d+$/){
         croak "new() requires the \$addr param, as an integer";
     }
-   
+
     $dev = defined $dev ? $dev : '/dev/i2c-1';
 
     my $fh = IO::File->new($dev, O_RDWR);
-    
+
     my $self = bless $fh, $class;
 
     my $i2c_conn = $self->ioctl(I2C_SLAVE_FORCE, int($addr));
@@ -36,9 +36,9 @@ sub new {
             my $hex_addr = sprintf "0x%x", $addr;
             croak "I2C device at address $hex_addr not found\n";
         }
-    } 
+    }
     return $self;
-}        
+}
 sub process {
     my ($self, $register_address, $value) = @_;
     return _processCall($self->fileno, $register_address, $value);
