@@ -1,10 +1,58 @@
 Revision history for RPi-I2C
 
-3.1802 UNREL
+3.1803 UNREL
     - Added t/10-validation.t: HW-free unit coverage of new() address
       validation, the _set_reg() register default, and the current
       read_bytes()/write_word() behaviour (pinned via a faked object + stubbed
       XS reads/writes - no bus, no device)
+    - Fix _readBlockData() XSUB: croak() on SMBus read failure instead of
+      falling through to sv_setpvn() with length -1 (a (STRLEN)-1 over-read
+      that could segfault the interpreter)
+    - new() now croaks "could not open <dev>" with errno when the device file
+      can't be opened (was: "Can't bless non-reference value"), and the ioctl
+      croak states the real failure (ioctl(I2C_SLAVE_FORCE) + errno) instead
+      of claiming device absence - with I2C_SLAVE_FORCE that ioctl succeeds
+      even on an empty bus; absence detection is check_device()'s job. New
+      HW-free tests in t/10-validation.t cover both paths
+    - POD: fix the config.txt directive for enabling the I2C bus
+      (ram=i2c_arm=on -> dtparam=i2c_arm=on); fix "examples direcory" typo;
+      document the 32-byte SMBus block cap (silent clamp) on both
+      read_block() and write_block()
+    - Add t/10-validation.t to MANIFEST - it was never added when the test
+      file landed, so the dist tarball would have shipped without it
+      (found via post-build RELEASE_TESTING manifest.t; the build artifacts
+      themselves were already covered by MANIFEST.SKIP)
+    - Add GitHub Actions CI workflow (ubuntu-only matrix - the dist builds
+      against the kernel's i2c interface, no wiringPi required; XS build
+      step before prove -b; modeled on rpi-pwm-pca9685's workflow)
+    - Add examples/arduino.ino to MANIFEST - the POD's UNIT TESTS section
+      points users at the sketch but tarballs omitted it; manifest.t never
+      noticed because the unanchored .o$ skip pattern matched "arduino.ino".
+      Tighten the artifact skip patterns to \.bs$/\.c$/\.o$ and add \.so$
+      (previously covered only by the sloppy .o$ match), and skip
+      ^\.github/ (CI config stays out of the tarball, matching the other
+      rpi-* dists)
+    - License unified to Artistic 2.0 - Makefile.PL said GPL_2 while the
+      POD said "same terms as Perl itself"; both now artistic_2, matching
+      the newer RPi:: dists
+    - BREAKING: read_bytes() now returns the documented array of N bytes,
+      ascending from the base register (was: a single integer - only the
+      base-register byte - due to a (0 << 8) overwrite bug)
+    - BREAKING: write_word() and process() now take ($value, [$reg]) like
+      write_byte(), with the register optional and defaulting to 0x00 via
+      _set_reg() (was: ($reg, $value) with no default, contradicting the
+      POD)
+    - write_block() now croaks when given more than 32 bytes instead of
+      silently truncating (SMBus block-transfer limit)
+    - Version bumped 3.1802 -> 3.1803 to mark the API contract break
+      (3.1802 was never released; all of its entries ship here)
+    - Regenerate bundled ppport.h with Devel::PPPort 3.68 (was 3.20,
+      generated 2013 under perl 5.18.2 - predating every perl in the new
+      CI matrix); its self-audit reports I2C.xs needs no compat shims at
+      all, making the include a removal candidate (backlogged)
+    - new() now validates the address range: anything above 0x7F croaks
+      (I2C addresses are 7-bit); address 0x00 (general call) remains legal
+      by design - RPi::PWM::PCA9685->reset() depends on it for SWRST
 
 3.1801    2026-06-12
     - Exit Makefile.PL gracefully on non-Linux platforms (NA instead of

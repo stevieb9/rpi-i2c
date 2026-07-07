@@ -1,9 +1,11 @@
 examples/a.out$
 .claude/
+^\.github/
 _Inline
-.bs$
-.c$
-.o$
+\.bs$
+\.c$
+\.o$
+\.so$
 .sh$
 ~$
 ^blib/
