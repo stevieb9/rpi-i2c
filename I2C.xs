@@ -2,7 +2,6 @@
 #include "perl.h"
 #include "XSUB.h"
  
-#include "ppport.h"
 #include "i2c-dev.h"
 
 /* readI2CBlockData() must be defined in C to catch panic situations */
@@ -105,8 +104,9 @@ int I2C__readBlockData(file, command, output)
     int ret;
   CODE:
     ret = i2c_smbus_read_block_data(file, command, buf);
-    if (ret == -1)
-      RETVAL = ret;
+    if (ret == -1){
+        croak("_readBlockData() has invalid return. Is I2C device connected? Is the I2C bus speed set correctly?\n");
+    }
     sv_setpvn(output, buf, ret);
     RETVAL = ret;
   OUTPUT:

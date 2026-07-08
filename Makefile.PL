@@ -15,7 +15,7 @@ WriteMakefile(
     AUTHOR           => q{Steve Bertrand <steveb@cpan.org>},
     VERSION_FROM     => 'lib/RPi/I2C.pm',
     ABSTRACT_FROM    => 'lib/RPi/I2C.pm',
-    LICENSE          => 'GPL_2',
+    LICENSE          => 'artistic_2',
     PL_FILES         => {},
     INC              => "-I.",
     MIN_PERL_VERSION => 5.006,

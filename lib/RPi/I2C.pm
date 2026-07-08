@@ -3,7 +3,7 @@ package RPi::I2C;
 use strict;
 use warnings;
 
-our $VERSION = '3.1802';
+our $VERSION = '3.1803';
 our @ISA = qw(IO::Handle);
 
 use Carp;
@@ -23,9 +23,18 @@ sub new {
         croak "new() requires the \$addr param, as an integer";
     }
 
+    if ($addr > 0x7F) {
+        my $hex_addr = sprintf "0x%x", $addr;
+        croak "new() \$addr $hex_addr is out of range - I2C addresses are 7-bit (0x00-0x7F)";
+    }
+
     $dev = defined $dev ? $dev : '/dev/i2c-1';
 
     my $fh = IO::File->new($dev, O_RDWR);
+
+    if (! defined $fh) {
+        croak "could not open $dev: $!";
+    }
 
     my $self = bless $fh, $class;
 
@@ -34,14 +43,15 @@ sub new {
     if (! defined $i2c_conn || $i2c_conn < 0){
         if (! $ENV{I2C_TESTING}){
             my $hex_addr = sprintf "0x%x", $addr;
-            croak "I2C device at address $hex_addr not found\n";
+            croak "ioctl(I2C_SLAVE_FORCE) failed for address $hex_addr on $dev: $!\n";
         }
     }
     return $self;
 }
 sub process {
-    my ($self, $register_address, $value) = @_;
-    return _processCall($self->fileno, $register_address, $value);
+    my ($self, $value, $reg) = @_;
+    $reg = _set_reg($reg);
+    return _processCall($self->fileno, $reg, $value);
 }
 sub check_device {
     my ($self, $addr) = @_;
@@ -61,13 +71,11 @@ sub read_byte {
 sub read_bytes {
     my ($self, $num_bytes, $reg) = @_;
     $reg = _set_reg($reg);
-    my $retval = 0;
-    for (1..$num_bytes){
-        $retval = (0 << 8) | _readByteData(
-            $self->fileno, $reg + $num_bytes - $_
-        )
+    my @bytes;
+    for (0 .. $num_bytes - 1) {
+        push @bytes, _readByteData($self->fileno, $reg + $_);
     }
-    return $retval;
+    return @bytes;
 }
 sub read_word {
     my ($self, $reg) = @_;
@@ -92,12 +100,17 @@ sub write_byte {
     return _writeByteData($self->fileno, $reg, $value);
 }
 sub write_word {
-    my ($self, $reg, $value) = @_;
+    my ($self, $value, $reg) = @_;
     $reg = _set_reg($reg);
     return _writeWordData($self->fileno, $reg, $value);
 }
 sub write_block {
     my ($self, $values, $reg) = @_;
+
+    if (@{ $values } > 32) {
+        croak "write_block() accepts a maximum of 32 bytes (SMBus block limit)";
+    }
+
     $reg = _set_reg($reg);
     my $value = pack "C*", @{$values};
     return _writeI2CBlockData($self->fileno, $reg, $value);
@@ -151,7 +164,7 @@ RPi::I2C - Interface to the I2C bus
 
     $device->write_block([1, 2, 3, 4]);
 
-See the examples direcory for more information on usage with an Arduino unit.
+See the examples directory for more information on usage with an Arduino unit.
 
 =head1 DESCRIPTION
 
@@ -180,10 +193,10 @@ To test your I2C bus:
 =head2 Raspberry Pi
 
 First thing you need to do is enable the I2C bus. You can do so in
-C<raspi-config>, or ensure the C<ram=i2c_arm> directive is set to C<on> in the
-C</boot/config.txt> file:
+C<raspi-config>, or ensure the C<dtparam=i2c_arm> directive is set to C<on> in
+the C</boot/config.txt> file:
 
-    ram=i2c_arm=on
+    dtparam=i2c_arm=on
 
 =head2 Arduino
 
@@ -205,7 +218,9 @@ Parameters:
     $addr
 
 Mandatory, Integer (in hex): The address of the device on the I2C bus
-(C<i2cdetect -y 1>). eg: C<0x78>.
+(C<i2cdetect -y 1>). eg: C<0x78>. Valid range is C<0x00>-C<0x7F> (7-bit
+addressing); anything outside that range croaks. Address C<0x00> (the I2C
+general call) is intentionally legal.
 
     $device
 
@@ -250,7 +265,7 @@ C<0x0>.
 Return, Array: An array where each element is a byte of data. The length of this
 array is dictated by the C<$num_bytes> parameter.
 
-Returns C<-1> on error.
+A failed read of any individual byte appears as C<-1> in its array element.
 
 =head2 read_word([$reg])
 
@@ -264,7 +279,9 @@ Parameters:
 
     $num_bytes
 
-Mandatory, Integer: The number of bytes you want to read.
+Mandatory, Integer: The number of bytes you want to read. Maximum is 32 (the
+SMBus block-transfer limit); the underlying SMBus layer silently clamps larger
+requests to 32 bytes.
 
     $reg
 
@@ -319,7 +336,8 @@ Parameters:
     $values
 
 Mandatory, Array Reference: Up to 32 elements, where each element is a single
-byte to be written to the device.
+byte to be written to the device. 32 bytes is the SMBus block-transfer limit;
+sending more than 32 elements croaks.
 
     $reg
 
@@ -402,6 +420,8 @@ Steve Bertrand, C<< <steveb at cpan.org> >>
 
 Copyright (C) 2017-2026 by Steve Bertrand
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.18.2 or,
-at your option, any later version of Perl 5 you may have available.
+This program is free software; you can redistribute it and/or modify it
+under the terms of the Artistic License (2.0). You may obtain a copy
+of the full license at:
+
+L<http://www.perlfoundation.org/artistic_license_2_0>

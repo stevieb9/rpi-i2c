@@ -1,4 +1,5 @@
 Changes
+examples/arduino.ino
 examples/pi_read_a0/a0.pl
 examples/pi_read_block_from_arduino/block.pl
 examples/pi_read_byte_from_arduino/byte.pl
@@ -14,9 +15,9 @@ lib/RPi/I2C.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
-ppport.h
 README
 t/00-load.t
+t/10-validation.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
