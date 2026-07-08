@@ -107,6 +107,11 @@ Revision history for RPi-I2C
       where the data can be fetched back out at a certain register to make
       comparisons on (this functionality will be incorporated into the
       RPi::WiringPi unit test suite)
+    - Added a TECHNICAL INFORMATION POD section: DEVICE SPECIFICS (bus-level
+      facts - Pi I2C pins, 3.3V, speeds, /dev/i2c-1, 7-bit addressing, the
+      32-byte block cap), ON THE WIRE (per-method SMBus/I2C transaction
+      diagrams drawn against the settled 3.1803 method contracts), and
+      DATASHEET (the NXP I2C-bus specification UM10204, Rev. 7.0)
 
 2.3601  2017-06-22
     - First version, released on an unsuspecting world.

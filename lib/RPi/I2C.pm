@@ -406,6 +406,122 @@ file to a lower value:
 
     dtparam=i2c_arm_baudrate=10000
 
+=head1 TECHNICAL INFORMATION
+
+=head2 DEVICE SPECIFICS
+
+This distribution is a thin Perl wrapper over the Linux I2C/SMBus C<ioctl>
+layer, so its "device specifics" are those of the Raspberry Pi's I2C bus
+itself rather than of any one chip:
+
+    - Two wires, SDA (data) and SCL (clock), both open-drain and pulled up
+    - The Pi's primary user bus is C</dev/i2c-1> on header pin 3 (SDA1 =
+      GPIO2) and pin 5 (SCL1 = GPIO3), with on-board 1.8k pull-ups to 3.3V
+    - 3.3V logic - the Pi is not 5V tolerant; level-shift any 5V device
+    - 7-bit addressing (0x00-0x7F); the general-call address 0x00 is legal
+    - Bus speed follows the kernel i2c_arm baudrate: 100kHz (Standard-mode)
+      by default, up to 400kHz (Fast-mode) via dtparam=i2c_arm_baudrate
+    - Data is framed by START/STOP conditions with one ACK bit per byte;
+      multi-byte SMBus words move low byte first
+    - SMBus block transfers are capped at 32 bytes
+
+Enable the bus with C<dtparam=i2c_arm=on> and, for a slow slave such as an
+Arduino, lower its speed with C<dtparam=i2c_arm_baudrate> (see L</READ THIS
+FIRST> and L</TROUBLESHOOTING>). Address validation and device-node
+selection live in L</new($addr, [$device])>.
+
+=head2 ON THE WIRE
+
+Each method maps to a single SMBus/I2C transaction. In the frames below
+C<S> is a START, C<Sr> a repeated START, C<P> a STOP, C<A> an ACK and C<N>
+a NACK. The address byte is the 7-bit device address shifted left one bit
+with the R/W bit appended, so the SYNOPSIS device at 0x04 clocks out as
+C<0x08> on a write and C<0x09> on a read. Word values move low byte first.
+
+L</read> - SMBus Receive Byte, no register:
+
+    +---+------+---+------+---+---+
+    | S | 0x09 | A | data | N | P |
+    +---+------+---+------+---+---+
+         addr+R      one byte from the chip
+
+L</read_byte([$reg])> - SMBus Read Byte Data (point, then read):
+
+    +---+------+---+------+---+   +----+------+---+------+---+---+
+    | S | 0x08 | A | 0x0A | A |   | Sr | 0x09 | A | data | N | P |
+    +---+------+---+------+---+   +----+------+---+------+---+---+
+         addr+W    register            addr+R      one byte
+
+L</read_bytes($num_bytes, [$reg])> - one Read Byte Data per register,
+ascending from the base, returned as a C<$num_bytes>-element array. So
+C<read_bytes(3, 0x0A)> is three separate transactions:
+
+    Read Byte Data @0x0A  ->  @0x0B  ->  @0x0C    returns (b0, b1, b2)
+
+L</read_word([$reg])> - SMBus Read Word Data, low byte first:
+
+    +---+------+---+------+---+   +----+------+---+-----+---+-----+---+---+
+    | S | 0x08 | A | 0x0A | A |   | Sr | 0x09 | A | LSB | A | MSB | N | P |
+    +---+------+---+------+---+   +----+------+---+-----+---+-----+---+---+
+         addr+W    register            addr+R    value = (MSB << 8) | LSB
+
+L</read_block($num_bytes, [$reg])> - block read from a base register (up to
+32 bytes):
+
+    +---+------+---+------+---+   +----+------+---+----+-- --+------+---+---+
+    | S | 0x08 | A | 0x0A | A |   | Sr | 0x09 | A | b0 | ... | bN-1 | N | P |
+    +---+------+---+------+---+   +----+------+---+----+-- --+------+---+---+
+         addr+W    register            addr+R    contiguous bytes
+
+L</write($data)> - SMBus Send Byte, no register:
+
+    +---+------+---+------+---+---+
+    | S | 0x08 | A | data | A | P |
+    +---+------+---+------+---+---+
+         addr+W      one byte to the chip
+
+L</write_byte($data, [$reg])> - SMBus Write Byte Data:
+
+    +---+------+---+------+---+------+---+---+
+    | S | 0x08 | A | 0x0A | A | data | A | P |
+    +---+------+---+------+---+------+---+---+
+         addr+W    register    byte
+
+L</write_word($data, [$reg])> - SMBus Write Word Data, low byte first
+(0xBEEF shown):
+
+    +---+------+---+------+---+------+---+------+---+---+
+    | S | 0x08 | A | 0x0A | A | 0xEF | A | 0xBE | A | P |
+    +---+------+---+------+---+------+---+------+---+---+
+         addr+W    register    LSB         MSB
+
+L</write_block($values, [$reg])> - block write to a base register (n <= 32):
+
+    +---+------+---+------+---+----+-- --+------+---+---+
+    | S | 0x08 | A | 0x0A | A | b0 | ... | bN-1 | A | P |
+    +---+------+---+------+---+----+-- --+------+---+---+
+         addr+W    register    contiguous bytes
+
+L</process($value, [$reg])> - SMBus Process Call: write a word, then read a
+word back at the same register (low byte first each way):
+
+    +---+------+---+------+---+-----+---+-----+---+
+    | S | 0x08 | A | 0x0A | A | LSB | A | MSB | A |    write the word
+    +---+------+---+------+---+-----+---+-----+---+
+
+    +----+------+---+-----+---+-----+---+---+
+    | Sr | 0x09 | A | LSB | A | MSB | N | P |          read the reply word
+    +----+------+---+-----+---+-----+---+---+
+
+=head2 DATASHEET
+
+The bus itself is defined by the NXP I<I2C-bus specification and user
+manual>, document B<UM10204> (Rev. 7.0, 1 October 2021, published by NXP
+Semiconductors). It is the authoritative reference for the START/STOP
+framing, 7-bit addressing, arbitration and bus timing summarised above; the
+SMBus byte/word/block/process-call transactions this module issues sit on
+top of it.
+
 =head1 ACKNOWLEDGEMENTS
 
 All of the XS code was copied directly from L<Device::I2C>, written by Slava
