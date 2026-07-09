@@ -61,6 +61,10 @@ Revision history for RPi-I2C
       confirms I2C.xs uses no API needing compat shims, so drop the #include
       from I2C.xs and the file from MANIFEST (supersedes the 3.68
       regeneration above; both changes are within the unreleased 3.1803)
+    - Added the family-canonical RPi::Const::BuildCheck::i2c_build_check()
+      shim to Makefile.PL (via CONFIGURE_REQUIRES) so a missing i2c
+      development header now exits NA rather than FAIL on CPAN testers; this
+      XS dist previously had no such guard
 
 3.1801    2026-06-12
     - Exit Makefile.PL gracefully on non-Linux platforms (NA instead of
