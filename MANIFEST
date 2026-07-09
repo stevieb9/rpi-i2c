@@ -1,4 +1,5 @@
 Changes
+docs/datasheet/UM10204.pdf
 examples/arduino.ino
 examples/pi_read_a0/a0.pl
 examples/pi_read_block_from_arduino/block.pl

@@ -112,6 +112,9 @@ Revision history for RPi-I2C
       32-byte block cap), ON THE WIRE (per-method SMBus/I2C transaction
       diagrams drawn against the settled 3.1803 method contracts), and
       DATASHEET (the NXP I2C-bus specification UM10204, Rev. 7.0)
+    - Bundled the UM10204 datasheet locally as docs/datasheet/UM10204.pdf
+      (Rev. 7.0, 1 October 2021, 62 pages) and repointed the DATASHEET POD at
+      it via F<...>; added the PDF to MANIFEST
 
 2.3601  2017-06-22
     - First version, released on an unsuspecting world.

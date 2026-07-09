@@ -516,11 +516,11 @@ word back at the same register (low byte first each way):
 =head2 DATASHEET
 
 The bus itself is defined by the NXP I<I2C-bus specification and user
-manual>, document B<UM10204> (Rev. 7.0, 1 October 2021, published by NXP
-Semiconductors). It is the authoritative reference for the START/STOP
-framing, 7-bit addressing, arbitration and bus timing summarised above; the
-SMBus byte/word/block/process-call transactions this module issues sit on
-top of it.
+manual>, document B<UM10204> (Rev. 7.0, 1 October 2021), distributed with
+this software as F<docs/datasheet/UM10204.pdf>. It is the authoritative
+reference for the START/STOP framing, 7-bit addressing, arbitration and bus
+timing summarised above; the SMBus byte/word/block/process-call transactions
+this module issues sit on top of it.
 
 =head1 ACKNOWLEDGEMENTS
 
