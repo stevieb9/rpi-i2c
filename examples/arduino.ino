@@ -5,8 +5,13 @@
  *
  * This file is part of the RPi::I2C Perl 5 distribution.
  *
- * This Arduino sketch handles all of the tests for the example files within
- * the examples directory in this distribution.
+ * This Arduino sketch provides several pseudo registers for testing the various
+ * read and write functions within the RPi::I2C distribution. Each function has
+ * its own dedicated register.
+ *
+ * In essence, each 'register' performs its own dedicated functionality when
+ * addressed by its register address. The list of register addresses are listed
+ * below as #define statements under the "pseudo registers" comment.
  *
  */
 
@@ -15,6 +20,8 @@
 
 #define EEPROM_SIZE 4
 #define SLAVE_ADDR 0x04
+
+// pseudo registers
 
 #define READ        0
 #define READ_BYTE   5
@@ -57,7 +64,7 @@ void eeprom_save (byte buf[], int len){
     }
 }
 
-void eeprom_save_byte (byte* data){
+void eeprom_save_byte (byte data){
     Serial.println("eeprom_save_byte()");
     EEPROM.put(0, data);
 }
@@ -125,8 +132,6 @@ int read_analog (int pin){
 
 void receive_data (int num_bytes){
 
-    byte data = 0;
-
     while(Wire.available()){
 
         // save the register value for use later
@@ -137,13 +142,13 @@ void receive_data (int num_bytes){
 
             case WRITE: {
                 Serial.println("write()");
-                data = reg;
+                byte data = reg;
                 eeprom_save_byte(data);
                 break;
             }
             case WRITE_BYTE: {
                 Serial.println("write_byte()");
-                data = Wire.read();
+                byte data = Wire.read();
 
                 eeprom_save_byte(data);
 
@@ -155,7 +160,6 @@ void receive_data (int num_bytes){
 
                 for (byte i=0; i<EEPROM_SIZE; i++){
                     buf[i] = Wire.read();
-                    data += buf[i];
                 }
 
                 eeprom_save(buf, EEPROM_SIZE);
